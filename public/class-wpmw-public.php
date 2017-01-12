@@ -107,7 +107,6 @@ class Wpmw_Public
     /**
      * Registers all shortcodes at once
      *
-     * @return [type] [description]
      */
     public function register_shortcodes()
     {
@@ -130,13 +129,13 @@ class Wpmw_Public
     {
 
 
-
         ob_start();
 
         $defaults['start-wizard-template'] = $this->plugin_name . '-start-wizard';
         $defaults['order'] = 'date';
         $defaults['quantity'] = 100;
         $args = shortcode_atts($defaults, $atts, 'start-wizard');
+
 
         include wpmw_get_template($args['start-wizard-template']);
 
@@ -154,11 +153,15 @@ class Wpmw_Public
         if (isset($_POST['sitename'])) {
 
             $sitename = $_POST['sitename'];
-            echo($sitename);
-            $new_blog_id = wpmu_create_blog( $sitename.'.realmultisite.dev', '/', $sitename, 1 );
-
-
+            $new_blog_id = wpmu_create_blog($sitename . '.realmultisite.dev', '/', $sitename, 1);
         }
 
+    }
+
+    function wpmw_ajax_vars()
+    { ?>
+        <script type="text/javascript">
+            var ajaxurl = <?php echo json_encode(admin_url("admin-ajax.php")); ?>;
+        </script><?php
     }
 }
