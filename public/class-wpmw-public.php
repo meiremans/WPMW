@@ -150,10 +150,28 @@ class Wpmw_Public
 
     function submit_site_name()
     {
-        if (isset($_POST['sitename'])) {
+        if (isset($_GET['sitename'])) {
 
-            $sitename = $_POST['sitename'];
-            $new_blog_id = wpmu_create_blog($sitename . '.realmultisite.dev', '/', $sitename, 1);
+            $stylesheet = 'WPMW-theme';
+            $site_name = $_GET['sitename'];
+            $post_content = $_GET['pageText'];
+
+            $new_blog_id = wpmu_create_blog($site_name . '.realmultisite.dev', '/', $site_name, 1);
+            switch_to_blog($new_blog_id);
+            $user_ID = get_current_user_id();
+            $new_post = array(
+                'post_title' => $site_name,
+                'post_content' => $post_content,
+                'post_status' => 'publish',
+                'post_date' => date('Y-m-d H:i:s'),
+                'post_author' => $user_ID,
+                'post_type' => 'page',
+                'post_category' => array(0)
+            );
+            $post_id = wp_insert_post($new_post);
+            switch_theme( $stylesheet );
+            restore_current_blog();
+
         }
 
     }

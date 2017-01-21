@@ -32,17 +32,35 @@
 })(jQuery);
 
 
-function wpmu_create_site() {
+function wpmu_wizard_step2() {
 
     jQuery('#wizard2').removeClass('hidden');
     jQuery('#wizard1').addClass('hidden');
 
     return false
+}
+function wpmu_wizard_step3() {
 
+    jQuery('#wizard3').removeClass('hidden');
+    jQuery('#wizard2').addClass('hidden');
+
+    return false
+}
+function wpmu_wizard_step4() {
+
+    jQuery('#wizard4').removeClass('hidden');
+    jQuery('#wizard3').addClass('hidden');
+
+}
+function wpmu_wizard_step5() {
+    jQuery('#wizard4').addClass('hidden');
+    submitNewSite();
 
 }
 
-function submitNewSite(theForm) {
+
+function submitNewSite(e,theForm) {
+    e.preventDefault();
     var data = jQuery(theForm).serialize();
     jQuery.ajax({
         type: "POST",
