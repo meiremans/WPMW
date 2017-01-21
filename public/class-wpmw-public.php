@@ -154,6 +154,7 @@ class Wpmw_Public
 
             $stylesheet = 'WPMW-theme';
             $site_name = $_GET['sitename'];
+            $banner = $_GET['bannerChoice'];
             $post_content = $_GET['pageText'];
 
             $new_blog_id = wpmu_create_blog($site_name . '.realmultisite.dev', '/', $site_name, 1);
@@ -168,7 +169,9 @@ class Wpmw_Public
                 'post_type' => 'page',
                 'post_category' => array(0)
             );
+
             $post_id = wp_insert_post($new_post);
+            add_post_meta( $post_id, '_WPMW_banner', $banner, false );
             switch_theme( $stylesheet );
             restore_current_blog();
 
