@@ -159,24 +159,44 @@ class Wpmw_Public
 
             $new_blog_id = wpmu_create_blog($site_name . '.realmultisite.dev', '/', $site_name, 1);
             switch_to_blog($new_blog_id);
-            $user_ID = get_current_user_id();
-            $new_post = array(
-                'post_title' => $site_name,
-                'post_content' => $post_content,
-                'post_status' => 'publish',
-                'post_date' => date('Y-m-d H:i:s'),
-                'post_author' => $user_ID,
-                'post_type' => 'page',
-                'post_category' => array(0)
-            );
-
-            $post_id = wp_insert_post($new_post);
-            add_post_meta($post_id, '_WPMW_banner', $banner, false);
-            switch_theme($stylesheet);
             $this->create_menu();
-            restore_current_blog();
+            $this->add_page($site_name, $post_content, $banner, TRUE);
 
+            switch_theme($stylesheet);
+            restore_current_blog();
         }
+
+    }
+
+    function add_page($title, $content, $banner, $isHome = FALSE)
+    {
+        $new_post = array(
+            'post_title' => $title,
+            'post_content' => $content,
+            'post_status' => 'publish',
+            'post_date' => date('Y-m-d H:i:s'),
+            'post_author' => get_current_user_id(),
+            'post_type' => 'page',
+            'post_category' => array(0)
+        );
+        $post_id = wp_insert_post($new_post);
+        add_post_meta($post_id, '_WPMW_banner', $banner, false);
+        $menulocation = 'header-menu';
+        $locations = get_nav_menu_locations();
+        $menu_id = $locations[$menulocation];
+        if ($isHome) {
+            wp_update_nav_menu_item($menu_id, 0, array(
+                'menu-item-title' => __('Home'),
+                'menu-item-classes' => 'home',
+                'menu-item-url' => home_url('/'),
+                'menu-item-status' => 'publish'));
+        } else {
+            wp_update_nav_menu_item($menu_id, 0, array(
+                'menu-item-title' => __($title),
+                'menu-item-url' => home_url('/' . $title),
+                'menu-item-status' => 'publish'));
+        }
+
 
     }
 
@@ -190,18 +210,6 @@ class Wpmw_Public
 // If it doesn't exist, let's create it.
         if (!$menu_exists) {
             $menu_id = wp_create_nav_menu($menu_name);
-
-            // Set up default menu items
-            wp_update_nav_menu_item($menu_id, 0, array(
-                'menu-item-title' => __('Home'),
-                'menu-item-classes' => 'home',
-                'menu-item-url' => home_url('/'),
-                'menu-item-status' => 'publish'));
-
-            wp_update_nav_menu_item($menu_id, 0, array(
-                'menu-item-title' => __('Custom Page'),
-                'menu-item-url' => home_url('/custom/'),
-                'menu-item-status' => 'publish'));
 
         }
         if (!has_nav_menu($menulocation)) {
