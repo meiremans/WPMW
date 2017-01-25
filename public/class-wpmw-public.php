@@ -171,12 +171,44 @@ class Wpmw_Public
             );
 
             $post_id = wp_insert_post($new_post);
-            add_post_meta( $post_id, '_WPMW_banner', $banner, false );
-            switch_theme( $stylesheet );
+            add_post_meta($post_id, '_WPMW_banner', $banner, false);
+            switch_theme($stylesheet);
+            $this->create_menu();
             restore_current_blog();
 
         }
 
+    }
+
+    function create_menu()
+    {
+        // Check if the menu exists
+        $menu_name = 'Menu For Site';
+        $menulocation = 'header-menu';
+        $menu_exists = wp_get_nav_menu_object($menu_name);
+
+// If it doesn't exist, let's create it.
+        if (!$menu_exists) {
+            $menu_id = wp_create_nav_menu($menu_name);
+
+            // Set up default menu items
+            wp_update_nav_menu_item($menu_id, 0, array(
+                'menu-item-title' => __('Home'),
+                'menu-item-classes' => 'home',
+                'menu-item-url' => home_url('/'),
+                'menu-item-status' => 'publish'));
+
+            wp_update_nav_menu_item($menu_id, 0, array(
+                'menu-item-title' => __('Custom Page'),
+                'menu-item-url' => home_url('/custom/'),
+                'menu-item-status' => 'publish'));
+
+        }
+        if (!has_nav_menu($menulocation)) {
+            $locations = get_theme_mod('nav_menu_locations');
+            $locations[$menulocation] = $menu_id;
+            set_theme_mod('nav_menu_locations', $locations);
+        }
     }
 
     function wpmw_ajax_vars()
