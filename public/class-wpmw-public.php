@@ -148,25 +148,35 @@ class Wpmw_Public
 
     } // list_openings()
 
-    function submit_site_name()
+    function submit_site_name($site_name)
     {
-        if (isset($_GET['sitename'])) {
-
-            $stylesheet = 'WPMW-theme';
-            $site_name = $_GET['sitename'];
-            $banner = $_GET['bannerChoice'];
-            $post_content = $_GET['pageText'];
-
+        if (isset($site_name)) {
             $new_blog_id = wpmu_create_blog($site_name . '.realmultisite.dev', '/', $site_name, 1);
-            switch_to_blog($new_blog_id);
-            $this->create_menu();
-            $this->add_page($site_name, $post_content, $banner, TRUE);
-
-            switch_theme($stylesheet);
-            restore_current_blog();
+            if (is_wp_error($new_blog_id)) {
+                return 0;
+            } else {
+                switch_to_blog($new_blog_id);
+                return $new_blog_id;
+            }
         }
 
     }
+
+    function submit_menu()
+    {
+        $this->create_menu();
+    }
+
+    function submit_home_page($site_name, $post_content, $banner)
+    {
+        $this->add_page($site_name, $post_content, $banner, TRUE);
+    }
+
+    function submit_page($site_name, $post_content, $banner)
+    {
+        $this->add_page($site_name, $post_content, $banner, FALSE);
+    }
+
 
     function add_page($title, $content, $banner, $isHome = FALSE)
     {
@@ -193,7 +203,7 @@ class Wpmw_Public
         } else {
             wp_update_nav_menu_item($menu_id, 0, array(
                 'menu-item-title' => __($title),
-                'menu-item-url' => home_url('/' . $title),
+                'menu-item-url' => home_url('/').$title,
                 'menu-item-status' => 'publish'));
         }
 
@@ -219,10 +229,55 @@ class Wpmw_Public
         }
     }
 
+    function myajax_load_jquery_form()
+    {
+        wp_enqueue_script('jquery-form');
+    }
+
     function wpmw_ajax_vars()
     { ?>
         <script type="text/javascript">
             var ajaxurl = <?php echo json_encode(admin_url("admin-ajax.php")); ?>;
         </script><?php
     }
+
+    /*
+ * Handeling ajax request
+ */
+
+    function site_submission()
+    {
+        $stylesheet = 'WPMW-theme';
+        // A default response holder, which will have data for sending back to our js file
+        $response = array(
+            'error' => false,
+        );
+        $banner_choice = $_POST['bannerChoice'];
+        $page_text = $_POST['pageText'];
+        $site_type = $_POST['siteType'];
+        $site_name = $_POST['sitename'];
+        $page_name1 = $_POST['pageName1'];
+        $page_text1 = $_POST['pageText1'];
+
+
+        // Check if each field is filled in
+        if (trim('' == $banner_choice || '' == $page_text || '' == $site_type || '' == $site_name)) {
+            $response['error'] = true;
+            $response['error_message'] = 'Something went wrong';
+            // Exit here, for not processing further because of the error
+            exit(json_encode($response));
+        }
+        $this->submit_site_name($site_name);
+        $this->submit_menu();
+        $this->submit_home_page($site_name, $page_text, $banner_choice);
+        $this->submit_page($page_name1, $page_text1, $banner_choice);
+
+        switch_theme($stylesheet);
+        restore_current_blog();
+
+
+        // Don't forget to exit at the end of processing
+        exit(json_encode($response));
+    }
+
 }

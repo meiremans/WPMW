@@ -176,6 +176,8 @@ class Wpmw {
         $this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
         $this->loader->add_action('init',$plugin_public, 'submit_site_name');
         $this->loader->add_action( 'wp_head',$plugin_public, 'wpmw_ajax_vars' );
+        $this->loader->add_action( 'wp_ajax_site_submission',$plugin_public, 'site_submission' );
+        $this->loader->add_action( 'wp_ajax_nopriv_site_submission',$plugin_public, 'site_submission' );
 
 
 

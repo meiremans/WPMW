@@ -6,7 +6,7 @@
      * should reside in this file.
      *
      * Note: It has been assumed you will write jQuery code here, so the
-     * $ function reference has been prepared for usage within the scope
+     * $ function reference has been preparaed for usge within the scope
      * of this function.
      *
      * This enables you to define handlers, for when the DOM is ready:
@@ -53,22 +53,22 @@ function wpmu_wizard_step4() {
 
 }
 function wpmu_wizard_step5() {
+    jQuery('#wizard5').removeClass('hidden');
     jQuery('#wizard4').addClass('hidden');
-    submitNewSite();
 
 }
 
 
-function submitNewSite(e,theForm) {
-    e.preventDefault();
-    var data = jQuery(theForm).serialize();
-    jQuery.ajax({
-        type: "POST",
-        url: ajaxurl,
-        dataType: "html",
-        data: data,
-        success: function () {
-            window.alert("SUCCESS");
-        }
+jQuery(document).ready(function($) {
+
+    $('.wordpress-ajax-form').on('submit', function(e) {
+        e.preventDefault();
+
+        var $form = $(this);
+        $.post($form.attr('action'), $form.serialize(), function(data) {
+            console.log(data);
+            alert('This is data returned from the server ' + data);
+        }, 'json');
     });
-}
+
+});

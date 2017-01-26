@@ -5,7 +5,7 @@
 ?>
 <span class="title" itemprop="name">AB-IT's mega cool site wizard</span>
 
-<form action="#" onsubmit="return wpmu_wizard_step5(this);">
+<form class="wordpress-ajax-form" method="post" action="<?php echo admin_url('admin-ajax.php'); ?>">
     <div id="wizard1">
         Sitename: <input type="text" name="sitename"><br>
         <input type="button" value="Submit" onClick="return wpmu_wizard_step2(this)">
@@ -42,7 +42,17 @@
         <textarea rows="4" cols="50" name="pageText">
               Insert your text here
            </textarea>
-        <input name="action" value="'site-type-submission" type="hidden">
+        <input type="button" value="Submit" onClick="return wpmu_wizard_step5(this)">
+
+    </div>
+
+    <div id="wizard5" class="hidden">
+        <span class="title" itemprop="name">Insert your text for next page</span>
+        Page name: <input type="text" name="pageName1"><br>
+        <textarea rows="4" cols="50" name="pageText1">
+              Insert your text here
+           </textarea>
+        <input name="action" value="site_submission" type="hidden">
         <input type="submit" value="Submit">
 
     </div>
