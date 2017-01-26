@@ -178,6 +178,8 @@ class Wpmw {
         $this->loader->add_action( 'wp_head',$plugin_public, 'wpmw_ajax_vars' );
         $this->loader->add_action( 'wp_ajax_site_submission',$plugin_public, 'site_submission' );
         $this->loader->add_action( 'wp_ajax_nopriv_site_submission',$plugin_public, 'site_submission' );
+        $this->loader-> add_action( 'wp_ajax_email_submission',$plugin_public, 'email_submission' );
+        $this->loader->add_action( 'wp_ajax_nopriv_email_submission',$plugin_public, 'email_submission' );
 
 
 

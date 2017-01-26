@@ -169,16 +169,21 @@ class Wpmw_Public
 
     function submit_home_page($site_name, $post_content, $banner)
     {
-        $this->add_page($site_name, $post_content, $banner, TRUE);
+        $this->add_page($site_name, $post_content, $banner, 'home');
     }
 
-    function submit_page($site_name, $post_content, $banner)
+    function submit_page($page_title, $post_content, $banner)
     {
-        $this->add_page($site_name, $post_content, $banner, FALSE);
+        $this->add_page($page_title, $post_content, $banner, 'page');
+    }
+
+    function submit_contact_page($contact_title, $contact_email, $contact_text, $banner)
+    {
+        $this->add_page($contact_title, $contact_text, $banner, 'contact', $contact_email);
     }
 
 
-    function add_page($title, $content, $banner, $isHome = FALSE)
+    function add_page($title, $content, $banner, $type, $extra = NULL)
     {
         $new_post = array(
             'post_title' => $title,
@@ -191,19 +196,29 @@ class Wpmw_Public
         );
         $post_id = wp_insert_post($new_post);
         add_post_meta($post_id, '_WPMW_banner', $banner, false);
+        add_post_meta($post_id, '_WPMW_TYPE', $type, false);
         $menulocation = 'header-menu';
         $locations = get_nav_menu_locations();
         $menu_id = $locations[$menulocation];
-        if ($isHome) {
+        if ('home' == $type) {
             wp_update_nav_menu_item($menu_id, 0, array(
                 'menu-item-title' => __('Home'),
                 'menu-item-classes' => 'home',
                 'menu-item-url' => home_url('/'),
                 'menu-item-status' => 'publish'));
-        } else {
+        }
+        if ('page' == $type) {
             wp_update_nav_menu_item($menu_id, 0, array(
                 'menu-item-title' => __($title),
-                'menu-item-url' => home_url('/').$title,
+                'menu-item-url' => home_url('/') . $title,
+                'menu-item-status' => 'publish'));
+        }
+        if ('contact' == $type) {
+            add_post_meta($post_id, '_WPMW_CONTACTEMAIL', $extra, false);
+            update_post_meta($post_id, '_wp_page_template', 'WPMW-contact-template.php');
+            wp_update_nav_menu_item($menu_id, 0, array(
+                'menu-item-title' => __($title),
+                'menu-item-url' => home_url('/') . $title,
                 'menu-item-status' => 'publish'));
         }
 
@@ -258,6 +273,8 @@ class Wpmw_Public
         $site_name = $_POST['sitename'];
         $page_name1 = $_POST['pageName1'];
         $page_text1 = $_POST['pageText1'];
+        $contact_email = $_POST['contactEmail'];
+        $contact_text = $_POST['contactText'];
 
 
         // Check if each field is filled in
@@ -271,6 +288,8 @@ class Wpmw_Public
         $this->submit_menu();
         $this->submit_home_page($site_name, $page_text, $banner_choice);
         $this->submit_page($page_name1, $page_text1, $banner_choice);
+        $this->submit_contact_page('contact', $contact_email, $contact_text, $banner_choice);
+
 
         switch_theme($stylesheet);
         restore_current_blog();
@@ -278,6 +297,51 @@ class Wpmw_Public
 
         // Don't forget to exit at the end of processing
         exit(json_encode($response));
+    }
+
+    function email_submission()
+    {
+        //response messages
+        $not_human       = "Human verification incorrect.";
+        $missing_content = "Please supply all information.";
+        $email_invalid   = "Email Address Invalid.";
+        $message_unsent  = "Message was not sent. Try Again.";
+        $message_sent    = "Thanks! Your message has been sent.";
+
+        //user posted variables
+        $email = $_POST['email'];
+        $message = $_POST['comment'];
+        $human = $_POST['message_human'];
+        $captcha= $_POST['g-recaptcha-response'];
+
+        if($this->checkCaptcha($captcha)) {
+            $response["captcha"] = TRUE;
+            $headers = 'From: ' . 'nickmeiremans@hotmail.com' . "\r\n" .
+                'Reply-To: ' . 'nickmeiremans@hotmail.com' . "\r\n";
+            $sent = wp_mail('nickmeiremans@hotmail.com', 'test', strip_tags('blabla'), $headers);
+            if ($sent) {
+                $response["success"] = $message_sent; //message sent!
+            } else {
+                $response["error"] = $message_unsent; //message wasn't sent
+            }
+        }else{
+            $response["captcha"] = FALSE;
+        }
+        exit(json_encode($response));
+    }
+
+    function checkCaptcha($captcha){
+        if(!$captcha){
+           return FALSE;
+        }
+        // calling google recaptcha api.
+        $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LeTUxMUAAAAANH1SAHcfBnuoEM3ilFJMrgmYwyZ&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']);
+        // validating result.
+        if($response.success==false) {
+            return FALSE;
+        } else {
+           return TRUE;
+        }
     }
 
 }

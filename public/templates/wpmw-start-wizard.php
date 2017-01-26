@@ -52,6 +52,16 @@
         <textarea rows="4" cols="50" name="pageText1">
               Insert your text here
            </textarea>
+        <input type="button" value="Submit" onClick="return wpmu_wizard_step6(this)">
+    </div>
+
+    <div id="wizard6" class="hidden">
+        <span class="title" itemprop="name">Contact Form</span>
+        Your email: <input type="text" name="contactEmail"><br>
+        <textarea rows="4" cols="50" name="contactText">
+              Text for your contact form
+           </textarea>
+
         <input name="action" value="site_submission" type="hidden">
         <input type="submit" value="Submit">
 

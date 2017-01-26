@@ -57,18 +57,36 @@ function wpmu_wizard_step5() {
     jQuery('#wizard4').addClass('hidden');
 
 }
+function wpmu_wizard_step6() {
+    jQuery('#wizard6').removeClass('hidden');
+    jQuery('#wizard5').addClass('hidden');
+
+}
 
 
-jQuery(document).ready(function($) {
-
-    $('.wordpress-ajax-form').on('submit', function(e) {
+jQuery(document).ready(function ($) {
+    $('.email-ajax-form').on('submit', function (e) {
         e.preventDefault();
 
         var $form = $(this);
-        $.post($form.attr('action'), $form.serialize(), function(data) {
+        console.log($form);
+        $.post($form.attr('action'), $form.serialize(), function (data) {
             console.log(data);
-            alert('This is data returned from the server ' + data);
+            if (false === data["captcha"]) {
+                $('.captachafailed').removeClass('hidden');
+            }
+            if (true === data["captcha"]) {
+                $('.success').removeClass('hidden');
+            }
         }, 'json');
     });
 
+    $('.wordpress-ajax-form').on('submit', function (e) {
+        e.preventDefault();
+
+        var $form = $(this);
+        $.post($form.attr('action'), $form.serialize(), function (data) {
+            console.log(data);
+        }, 'json');
+    });
 });
